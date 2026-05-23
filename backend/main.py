@@ -20,6 +20,7 @@ app.add_middleware(
 # Load custom YOLO26 brain
 model = YOLO("best.pt") 
 
+# WebSocket endpoint for real-time video stream processing
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -36,7 +37,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             # Run the frame through the YOLO26 model
             # verbose=False stops it from spamming terminal
-            results = model.predict(frame, conf=0.4, verbose=False)
+            results = model.predict(frame, conf=0.5, verbose=False)
 
             # Extract the coordinates and labels
             detections = []
@@ -59,3 +60,43 @@ async def websocket_endpoint(websocket: WebSocket):
             
     except Exception as e:
         print(f"Connection closed or error occurred: {e}")
+
+    # Static image detection endpoint for testing with Postman or React file upload
+    @app.post("/detect")
+    async def detect_image(file: UploadFile = File(...)):
+        try:
+            # Read the uploaded image bytes
+            contents = await file.read()
+            nparr = np.frombuffer(contents, np.uint8)
+            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            # Run YOLO26 Inference
+            results = model.predict(frame, conf=0.5, verbose=False)
+            
+            detections = []
+            for r in results:
+                boxes = r.boxes
+                for box in boxes:
+                    x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+                    conf = round(box.conf[0].item(), 2)
+                    cls = int(box.cls[0].item())
+                    name = model.names[cls]
+                    
+                    detections.append({"label": name, "confidence": conf})
+
+                    # Draw bounding boxes server-side for static images
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
+                    cv2.putText(frame, f"{name} {conf}", (x1, y1 - 10), 
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+            # Convert the annotated image back to Base64 to send to React
+            _, buffer = cv2.imencode('.jpg', frame)
+            encoded_image = base64.b64encode(buffer).decode('utf-8')
+
+            return JSONResponse(content={
+                "image": f"data:image/jpeg;base64,{encoded_image}",
+                "detections": detections
+            })
+
+        except Exception as e:
+            return JSONResponse(content={"error": str(e)}, status_code=500)
