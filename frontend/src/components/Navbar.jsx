@@ -1,7 +1,7 @@
 export default function Navbar({ activeTab, setActiveTab }) {
   const tabs = [
     { id: 'demo', label: 'Demo Gallery' },
-    { id: 'webcam', label: 'Live Webcam' },
+    { id: 'webcam', label: 'Webcam Detection' },
     { id: 'upload', label: 'Upload Image' }
   ];
 

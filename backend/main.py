@@ -34,7 +34,7 @@ async def websocket_endpoint(websocket: WebSocket):
             nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
             frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-            results = model.predict(frame, conf=0.25, verbose=False)
+            results = model.predict(frame, conf=0.6, verbose=False)
 
             detections = []
             for r in results:
@@ -66,7 +66,7 @@ async def detect_image(file: UploadFile = File(...)):
         frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         # Run YOLO Inference
-        results = model.predict(frame, conf=0.25, verbose=False)
+        results = model.predict(frame, conf=0.6, verbose=False)
         
         detections = []
         for r in results:
@@ -95,3 +95,4 @@ async def detect_image(file: UploadFile = File(...)):
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+    
