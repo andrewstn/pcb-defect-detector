@@ -1,0 +1,21 @@
+# docker-compose.yml
+
+services:
+  backend:
+    build: ./backend
+    container_name: pcb_ai_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build: ./frontend
+    container_name: pcb_ai_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      
