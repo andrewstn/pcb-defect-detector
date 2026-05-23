@@ -165,7 +165,7 @@ export default function DemoViewer() {
               {/* Added internal scrolling to the list */}
               <div className="flex-1 overflow-y-auto pr-2">
                 {detections.length === 0 ? (
-                  <p className="text-green-400 font-medium">✅ PASS: No defects detected.</p>
+                  <p className="text-green-400 font-medium">PASS: No defects detected.</p>
                 ) : (
                   <ul className="space-y-3">
                     {detections.map((det, idx) => (
