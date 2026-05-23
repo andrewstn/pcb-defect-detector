@@ -2,7 +2,8 @@ import cv2
 import numpy as np
 import base64
 import json
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, File, UploadFile
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from ultralytics import YOLO
 
